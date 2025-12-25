@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>SmartHire</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+<div class="container">
+    <h1>SmartHire – AI Resume Screening</h1>
+
+    <form method="POST">
+        <textarea name="jd" placeholder="Paste Job Description..." required></textarea>
+        <textarea name="resume" placeholder="Paste Resume..." required></textarea>
+        <button type="submit">Analyze</button>
+    </form>
+
+    {% if score is not none %}
+        <div class="result">
+            <h2>Match Score: {{ score }}%</h2>
+            <h3>Decision: {{ decision }}</h3>
+
+            <h3>Matched Skills</h3>
+            <p>{{ matched_skills }}</p>
+
+            <h3>Missing Skills</h3>
+            <p>{{ missing_skills }}</p>
+
+            <h3>Extracted Projects</h3>
+            <ul>
+                {% for p in projects %}
+                    <li>{{ p }}</li>
+                {% endfor %}
+            </ul>
+
+            <h3>Interview Questions</h3>
+            <ul>
+                {% for q in questions %}
+                    <li>{{ q }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+    {% endif %}
+</div>
+
+</body>
+</html>
