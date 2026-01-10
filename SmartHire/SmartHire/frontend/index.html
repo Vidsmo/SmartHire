@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>SmartHire — AI Resume Screening</title>
+  <link rel="icon"
+    href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><rect rx='6' width='24' height='24' fill='%2349111C'/><path d='M7 12l3 3 7-7' stroke='%23F2F4F3' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round' fill='none'/></svg>" />
+  <link rel="stylesheet" href="style.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body>
+  <div class="app">
+    <header class="nav">
+      <div class="nav-inner">
+        <div class="brand">
+          <div class="logo-box">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <defs>
+                <linearGradient id="g" x1="0" x2="1" y1="0" y2="1">
+                  <stop offset="0" stop-color="#6b1b27" />
+                  <stop offset="1" stop-color="#49111C" />
+                </linearGradient>
+              </defs>
+              <rect width="24" height="24" rx="6" fill="url(#g)" />
+              <path d="M7 12l3 3 7-7" stroke="#F2F4F3" stroke-width="1.5" stroke-linecap="round"
+                stroke-linejoin="round" />
+            </svg>
+          </div>
+          <div class="brand-text">
+            <div class="name">SmartHire</div>
+            <div class="tag">AI Resume Screening</div>
+          </div>
+        </div>
+
+        <nav class="tabs" role="tablist">
+          <button class="tab active" data-tab="analyze">Analyze</button>
+          <button class="tab" data-tab="compare">Compare</button>
+          <button class="tab" data-tab="docs">Docs Generator</button>
+          <button class="tab" data-tab="onboarding">Onboarding</button>
+          <button class="tab" data-tab="community">Community</button>
+        </nav>
+
+        <div class="system-stats">
+          <div class="stat">
+            <span class="dot online"></span>
+            <span>Gemini 1.5 Active</span>
+          </div>
+          <div class="stat">
+            <strong>42</strong>
+            <span>Processed</span>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <main class="container">
+
+      <section id="analyze" class="page active">
+        <div id="analyzeWelcome" class="welcome-panel">
+          <h2>Welcome to SmartHire AI Suite</h2>
+          <p>The total solution for modern HR teams. Automate screening, drafting, and onboarding in one place.</p>
+          <div class="quick-actions">
+            <button class="btn-ghost small" onclick="document.getElementById('job').focus()">✍️ Start Drafting
+              JD</button>
+            <button class="btn-ghost small" onclick="document.getElementById('resume').focus()">📄 Paste Resume</button>
+          </div>
+        </div>
+        <div class="grid">
+          <div class="panel">
+            <h3>Job Description</h3>
+            <textarea id="job" placeholder="Paste job description..."></textarea>
+          </div>
+
+          <div class="panel">
+            <h3>Resume</h3>
+            <textarea id="resume" placeholder="Paste resume..."></textarea>
+          </div>
+        </div>
+
+        <div class="controls">
+          <button id="analyzeBtn" class="btn-primary">Analyze Resume</button>
+        </div>
+
+        <div id="results" class="results hidden">
+          <div class="results-top">
+            <div class="score-card card glass">
+
+
+              <svg class="ring" width="160" height="160" viewBox="0 0 160 160">
+                <defs>
+                  <linearGradient id="ring-grad" x1="0" x2="1" y1="0" y2="1">
+                    <stop offset="0" stop-color="#6b1b27" />
+                    <stop offset="1" stop-color="#49111C" />
+                  </linearGradient>
+                </defs>
+                <circle cx="80" cy="80" r="70" stroke="#1a1a1a" stroke-width="16" fill="none" />
+                <circle id="progress" cx="80" cy="80" r="70" stroke="url(#ring-grad)" stroke-width="16" fill="none"
+                  stroke-linecap="round" transform="rotate(-90 80 80)" stroke-dasharray="440" stroke-dashoffset="440" />
+                <text id="scoreText" x="80" y="88" text-anchor="middle" font-size="28" fill="#F2F4F3"
+                  font-weight="700">0%</text>
+              </svg>
+              <div class="score-head">You are <span id="scoreHeadline">0%</span> fit for this role</div>
+            </div>
+
+            <div class="explain card glass">
+              <div class="explain-head">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                  <path d="M9 18h6M12 5v7" stroke="#A9927D" stroke-width="1.5" stroke-linecap="round"
+                    stroke-linejoin="round" />
+                </svg>
+                <h4>Why this decision?</h4>
+              </div>
+              <ul id="explanations" class="explanations"></ul>
+              <div id="aiInsightsContainer" class="ai-insights hidden">
+                <div class="ai-badge">AI ANALYST</div>
+                <p id="aiInsightsText"></p>
+              </div>
+            </div>
+          </div>
+
+          <div class="skill-grid">
+            <div class="card glass skills">
+              <h4>Strongly Matched Skills</h4>
+              <div id="strongSkills" class="chips"></div>
+            </div>
+            <div class="card glass skills">
+              <h4>Partially Matched</h4>
+              <div id="midSkills" class="chips"></div>
+            </div>
+            <div class="card glass skills">
+              <h4>Skills to Improve</h4>
+              <div id="missingSkills" class="chips"></div>
+            </div>
+          </div>
+
+          <div class="card glass">
+            <h4>Soft Skills</h4>
+            <div id="softSkills" class="chips"></div>
+          </div>
+
+          <div class="card glass career-path">
+            <h4>🚀 Career Path Recommendations</h4>
+            <div id="careerRecommendations"></div>
+          </div>
+
+          <div class="card glass">
+            <h4>📊 Skill Proficiency Radar</h4>
+            <div class="chart-container">
+              <canvas id="skillChart"></canvas>
+            </div>
+          </div>
+
+          <div id="aiQuestionsCard" class="card glass hidden">
+            <h4>🤖 AI-Generated Interview Questions</h4>
+            <div id="aiQuestionsList" class="questions-list"></div>
+            <button id="regenerateQuestionsBtn" class="btn-ghost small">Regenerate Questions</button>
+          </div>
+
+          <div class="action-buttons">
+            <button class="btn-primary" id="downloadReportBtn">📄 Download Report</button>
+            <button class="btn-ghost" id="faqBtn">❓ FAQ</button>
+          </div>
+
+        </div>
+
+      </section>
+
+      <section id="compare" class="page">
+        <div class="compare-header">
+          <h3>Candidate Comparison & Ranking</h3>
+        </div>
+
+        <!-- Multi Candidate Compare UI -->
+        <div id="multiCompareUI">
+          <div class="compare-grid" id="compareGrid">
+            <div class="card candidate">
+              <h4>Candidate 1</h4>
+              <textarea class="compare-resume" placeholder="Paste resume..."></textarea>
+              <button class="btn-ghost small remove-candidate" style="margin-top:8px;">Remove</button>
+            </div>
+
+            <div class="card candidate">
+              <h4>Candidate 2</h4>
+              <textarea class="compare-resume" placeholder="Paste resume..."></textarea>
+              <button class="btn-ghost small remove-candidate" style="margin-top:8px;">Remove</button>
+            </div>
+
+            <div class="card candidate">
+              <h4>Candidate 3</h4>
+              <textarea class="compare-resume" placeholder="Paste resume..."></textarea>
+              <button class="btn-ghost small remove-candidate" style="margin-top:8px;">Remove</button>
+            </div>
+          </div>
+
+          <div class="compare-controls" style="margin-top:12px;">
+            <button id="addCompareCandidateBtn" class="btn-ghost small">+ Add Candidate</button>
+            <button id="resetCompareCandidatesBtn" class="btn-ghost small">Reset Candidates</button>
+          </div>
+        </div>
+
+        <div class="controls">
+          <button id="compareBtn" class="btn-primary">Compare / Rank All</button>
+        </div>
+
+        <div id="compareResults" class="results hidden">
+          <div class="card glass compare-outcome">
+            <h4>Outcome & Leaderboard</h4>
+            <div id="comparisonText"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Docs Generator -->
+      <section id="docs" class="page">
+        <div class="grid">
+          <div class="panel">
+            <h3>Document Type</h3>
+            <select id="docType" class="premium-select">
+              <option value="offer_letter">Offer Letter</option>
+              <option value="rejection_mail">Rejection Email</option>
+              <option value="nda">Non-Disclosure Agreement (NDA)</option>
+              <option value="intern_contract">Internship Contract</option>
+            </select>
+
+            <h3>Candidate Details</h3>
+            <input type="text" id="docCandName" placeholder="Full Name" class="premium-input">
+            <textarea id="docJobInfo" placeholder="Role, Salary, Joining Date..."
+              style="min-height: 100px; margin-top: 10px;"></textarea>
+
+            <button id="generateDocBtn" class="btn-primary" style="margin-top: 20px; width: 100%;">Generate Document</button>
+          </div>
+
+          <div class="panel">
+            <h3>Generated Document</h3>
+            <div id="docOutput" class="doc-viewer">
+              <div class="muted">Generated document will appear here...</div>
+            </div>
+            <button id="copyDocBtn" class="btn-ghost" style="margin-top: 15px; width: 100%;">Copy to Clipboard</button>
+            <button id="scheduleInterviewBtn" class="btn-secondary btn-sched" aria-label="Schedule Interview">
+              <svg class="sched-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false">
+                <rect x="3" y="5" width="18" height="16" rx="2" stroke="currentColor" stroke-width="1.2" fill="none"></rect>
+                <path d="M16 3v4M8 3v4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"></path>
+                <path d="M7 11h10M7 15h4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"></path>
+              </svg>
+              <div class="sched-labels">
+                <div class="sched-main">Schedule Interview</div>
+                <div class="sched-sub">Send invitation to shortlisted candidate</div>
+              </div>
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ONBOARDING -->
+      <section id="onboarding" class="page">
+        <div class="onboarding-grid">
+          <!-- Left: Candidate list -->
+          <div class="card glass candidates-panel">
+            <div class="panel-head">
+              <h3>Active Onboardings</h3>
+              <div class="panel-actions">
+                <input id="candidateSearch" placeholder="Search candidates..." class="search-input" />
+                <button id="importOnboardBtn" class="btn-ghost small">Import</button>
+                <button id="exportOnboardBtn" class="btn-ghost small">Export</button>
+              </div>
+            </div>
+
+            <div id="candidatesList" class="candidates-list"></div>
+
+            <div style="margin-top:12px; display:flex; gap:10px;">
+              <button id="addCandidateBtn" class="btn-primary">+ Add Candidate</button>
+              <button id="resetOnboardBtn" class="btn-ghost">Reset</button>
+            </div>
+          </div>
+
+          <!-- Right: Candidate details -->
+          <div class="card glass candidate-detail-panel" id="candidateDetailPanel">
+            <div id="candidateEmpty" class="muted" style="padding:28px; text-align:center;">Select a candidate to view details, or create a new onboarding profile.</div>
+
+            <div id="candidateDetail" class="hidden" style="padding:18px;">
+              <div class="detail-header">
+                <div>
+                  <h3 id="detailName">Candidate Name</h3>
+                  <div id="detailRole" class="muted">Role • Starts in X days</div>
+                </div>
+                <div class="detail-actions">
+                  <button id="editCandidateBtn" class="btn-ghost small">Edit</button>
+                  <button id="deleteCandidateBtn" class="btn-ghost small">Delete</button>
+                </div>
+              </div>
+
+              <div style="margin-top:12px">
+                <div class="progress-track big">
+                  <div id="detailProgressFill" class="progress-fill" style="width: 0%;"></div>
+                </div>
+                <div style="display:flex; justify-content:space-between; margin-top:8px">
+                  <div id="detailProgressText">0% complete</div>
+                  <div id="detailStartDate" class="muted">Start: --</div>
+                </div>
+              </div>
+
+              <div style="margin-top:18px">
+                <h4 style="margin-bottom:10px">Onboarding Tasks</h4>
+                <div id="taskList" class="task-list"></div>
+                <div style="display:flex; gap:8px; margin-top:10px">
+                  <input id="newTaskInput" placeholder="Add new task..." class="premium-input small" />
+                  <button id="addTaskBtn" class="btn-primary small">Add</button>
+                </div>
+              </div>
+
+              <div style="margin-top:18px; display:flex; gap:10px">
+                <button id="startOnboardingBtn" class="btn-primary">Start Onboarding</button>
+                <button id="completeAllBtn" class="btn-ghost">Mark All Complete</button>
+              </div>
+
+              <div id="candidateNotes" style="margin-top:16px">
+                <h4>Notes</h4>
+                <textarea id="detailNotes" class="premium-input" style="min-height:100px"></textarea>
+                <div style="display:flex; gap:8px; margin-top:10px">
+                  <button id="saveNotesBtn" class="btn-primary small">Save Notes</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Candidate Modal -->
+        <div id="candidateModal" class="modal-overlay hidden">
+          <div class="modal">
+            <h3 id="modalTitle">Add Candidate</h3>
+            <div style="display:flex; flex-direction:column; gap:8px;">
+              <input id="modalName" placeholder="Full Name" class="premium-input" />
+              <input id="modalRole" placeholder="Role (e.g., Software Engineer)" class="premium-input" />
+              <input id="modalStartDate" type="date" class="premium-input" />
+              <textarea id="modalNotes" placeholder="Notes (optional)" class="premium-input" style="min-height:80px"></textarea>
+              <div style="display:flex; gap:8px; justify-content:flex-end; margin-top:8px">
+                <button id="modalCancel" class="btn-ghost">Cancel</button>
+                <button id="modalSave" class="btn-primary">Save</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- COMMUNITY -->
+      <section id="community" class="page">
+        <div class="community-grid">
+          <div class="card feature">
+            <h4>Resume Tips</h4>
+            <p>Templates and feedback from experts.</p>
+            <button class="btn-ghost"
+              onclick="window.open('https://www.coursera.org/articles/resume-tips', '_blank')">Explore</button>
+          </div>
+          <div class="card feature">
+            <h4>Interview Prep</h4>
+            <p>Mock interviews and scoring.</p>
+            <button class="btn-ghost">Start</button>
+          </div>
+        </div>
+        <div class="join-cta card">
+          <h3>Join the SmartHire Community</h3>
+          <p>Collaborate, learn, and grow your career.</p>
+          <button class="btn-primary" onclick="window.open('https://t.me/+EDx50LvUMNpjN2Y1', '_blank')">Join
+            Community</button>
+        </div>
+      </section>
+
+    </main>
+
+    <footer class="footer">
+      <div>© SmartHire</div>
+      <div class="footer-right">Made with ❤️</div>
+    </footer>
+
+    <!-- AI Chat Widget -->
+    <div id="aiChatWidget" class="ai-chat-widget">
+      <div id="chatTrigger" class="chat-trigger">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+          stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+        </svg>
+        <span>AI HR Agent</span>
+      </div>
+      <div id="chatWindow" class="chat-window hidden">
+        <div class="chat-header">
+          <div class="header-left">
+            <div class="ai-icon">AI</div>
+            <div>
+              <strong>SmartHire Agent</strong>
+              <div class="status">Online</div>
+            </div>
+          </div>
+          <button id="closeChat" class="close-btn">×</button>
+        </div>
+        <div id="chatMessages" class="chat-messages">
+          <div class="message ai">
+            Hello! I'm your AI HR Assistant. Analyze a resume to give me context, then ask me anything about the
+            candidate!
+          </div>
+        </div>
+        <div class="chat-input-area">
+          <input type="text" id="chatInput" placeholder="Ask about the candidate...">
+          <button id="sendChatBtn">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round">
+              <line x1="22" y1="2" x2="11" y2="13"></line>
+              <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+
+</html>
